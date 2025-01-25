@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 
 public static class SetsAndMaps
@@ -19,12 +21,28 @@ public static class SetsAndMaps
     /// that there were no duplicates) and therefore should not be returned.
     /// </summary>
     /// <param name="words">An array of 2-character words (lowercase, no duplicates)</param>
+
     public static string[] FindPairs(string[] words)
     {
-        // TODO Problem 1 - ADD YOUR CODE HERE
-        return [];
-    }
+        var pairs = new HashSet<string>();
+        var wordSet = new HashSet<string>(words);
 
+        foreach (var word in words)
+        {
+            var reverseWord = new string([word[1], word[0]]);
+            
+            if (string.IsNullOrEmpty(word)|| pairs.Contains($"{word[1]}{word[0]} & {word}") || pairs.Contains($"{word} & {word[1]}{word[0]}"))
+            {
+                continue;
+            }
+            if (wordSet.Contains(reverseWord) && word != reverseWord)
+            {
+                pairs.Add($"{word} & {reverseWord}");
+            }
+        }
+
+        return pairs.ToArray();
+    }   
     /// <summary>
     /// Read a census file and summarize the degrees (education)
     /// earned by those contained in the file.  The summary
@@ -42,7 +60,15 @@ public static class SetsAndMaps
         foreach (var line in File.ReadLines(filename))
         {
             var fields = line.Split(",");
-            // TODO Problem 2 - ADD YOUR CODE HERE
+            var degree = fields[3];
+            if (degrees.ContainsKey(degree))
+            {
+                degrees[degree]++;
+            }
+            else
+            {
+                degrees[degree] = 1;
+            }
         }
 
         return degrees;
@@ -66,8 +92,42 @@ public static class SetsAndMaps
     /// </summary>
     public static bool IsAnagram(string word1, string word2)
     {
-        // TODO Problem 3 - ADD YOUR CODE HERE
-        return false;
+        word1 = word1.ToLower().Replace(" ", "");
+        word2 = word2.ToLower().Replace(" ", "");
+        
+        if (word1.Length != word2.Length)
+        {
+            return false;
+        }
+        var letters = new Dictionary<char, int>();
+        foreach (var letter in word1)
+        {
+            if (letters.ContainsKey(letter))
+            {
+                letters[letter]++;
+            }
+            else
+            {
+                letters[letter] = 1;
+            }
+        }
+        foreach (var letter in word2)
+        {
+            if (letters.ContainsKey(letter))
+            {
+                letters[letter]--;
+                if (letters[letter] == 0)
+                {
+                    letters.Remove(letter);
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+        
+        return letters.Count == 0;
     }
 
     /// <summary>
@@ -101,6 +161,12 @@ public static class SetsAndMaps
         // on those classes so that the call to Deserialize above works properly.
         // 2. Add code below to create a string out each place a earthquake has happened today and its magitude.
         // 3. Return an array of these string descriptions.
-        return [];
+
+        var summaries = new List<string>();
+        foreach (var feature in featureCollection.features)
+        {
+            summaries.Add(feature.properties.ToString());
+        }
+        return summaries.ToArray();
     }
 }
